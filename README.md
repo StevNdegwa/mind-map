@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mind Map
 
-## Getting Started
+A lightweight app for sketching ideas and notes while learning. Create lessons, then use an embedded [Excalidraw](https://excalidraw.com) canvas to draw diagrams, mind maps, and rough notes. All data is stored locally in your browser with [Dexie](https://dexie.org) (IndexedDB).
 
-First, run the development server:
+## Features
+
+- **Lessons** — Create as many lessons as you need (e.g. per topic or course). Each has a name and its own canvas.
+- **Sketching** — Each lesson opens a full Excalidraw canvas: shapes, text, arrows, free draw, and images. Ideal for mind maps and quick diagrams.
+- **Auto-save** — Canvas state is saved to IndexedDB as you edit (debounced). Reopen a lesson to continue where you left off.
+- **Dark / light mode** — Theme toggle in the header. Preference is stored in `localStorage` and used for both the app and the Excalidraw canvas.
+- **Offline-first** — No backend; everything stays in your browser.
+
+## Tech stack
+
+- **Next.js 16** (App Router)
+- **React 19**
+- **TypeScript**
+- **Dexie** — IndexedDB wrapper for lessons and scene data
+- **@excalidraw/excalidraw** — Embedded drawing canvas
+- **CSS Modules** — Component styling
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 18+
+- npm, yarn, pnpm, or bun
+
+### Install and run
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build for production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+### Lint
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How to use
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Home** — On load you see the lesson list and a “New lesson name” field.
+2. **Create a lesson** — Type a name and click **Add**. The new lesson appears in the list and opens automatically.
+3. **Open a lesson** — Click any lesson in the list. The header shows the lesson name and a back arrow.
+4. **Sketch** — Use the Excalidraw toolbar (shapes, text, arrows, hand, etc.). Changes are saved automatically.
+5. **Back** — Click the back arrow to return to the lesson list and pick another lesson.
+6. **Theme** — Use the sun/moon icon in the header to switch between light and dark mode.
 
-## Deploy on Vercel
+## Project structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/
+│   ├── layout.tsx          # Root layout, theme script, metadata
+│   ├── page.tsx            # Entry: ThemeProvider + MindMapClient
+│   ├── page.module.css
+│   ├── globals.css         # CSS variables (light/dark)
+│   └── MindMapClient.tsx   # Main UI: lesson list vs lesson view
+├── components/
+│   ├── Header/             # Lesson title, back button, theme toggle
+│   ├── LessonPicker/       # “New lesson” form + lesson list
+│   ├── LessonView/         # Wrapper that loads ExcalidrawCanvas (client-only)
+│   └── ExcalidrawCanvas/   # Excalidraw + load/save scene to Dexie
+├── contexts/
+│   └── ThemeContext.tsx    # Theme state + localStorage
+└── lib/
+    └── db.ts               # Dexie schema: lessons (id, name, sceneData, …)
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Data model (Dexie)
+
+- **Table: `lessons`**
+  - `id` — string (primary key)
+  - `name` — string
+  - `createdAt`, `updatedAt` — numbers (timestamps)
+  - `sceneData` — string (optional), JSON from Excalidraw `serializeAsJSON(..., "database")`
+
+Theme preference is stored in `localStorage` under the key `mind-map-theme` (`"light"` or `"dark"`).
+
+## Learn more
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Excalidraw](https://excalidraw.com) — drawing and API
+- [Dexie](https://dexie.org) — IndexedDB
