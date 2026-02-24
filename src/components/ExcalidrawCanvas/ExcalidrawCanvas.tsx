@@ -8,6 +8,8 @@ import { serializeAsJSON } from "@excalidraw/excalidraw";
 import styles from "./ExcalidrawCanvas.module.css";
 
 import "@excalidraw/excalidraw/index.css";
+import { ExcalidrawInitialDataState } from "@excalidraw/excalidraw/types";
+
 
 const Excalidraw = dynamic(
   async () => {
@@ -99,7 +101,7 @@ export function ExcalidrawCanvas({
   return (
     <div className={styles.root}>
       <Excalidraw
-        initialData={initialData}
+        initialData={initialData ? () => Promise.resolve(initialData as ExcalidrawInitialDataState) : undefined}
         onChange={onChange}
         theme={theme}
         UIOptions={{
